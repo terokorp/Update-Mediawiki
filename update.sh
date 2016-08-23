@@ -28,8 +28,17 @@ UPDATER=`pwd`
 BACKUPTIME=$(date +"%Y%m%d-%H%M")
 
 cd .. ; cd `git rev-parse --show-toplevel`
-[ -f LocalSettings.php ] && echo "LocalSettings.php found, all good" || echo "LocalSettings.php not found, is this right folder?" exit
+if [ -f LocalSettings.php ]; then
+	echo "LocalSettings.php found, all good"
+else
+	echo "LocalSettings.php not found, is this right folder?"
+	exit 1
+fi
 
+if [ `stat -c '%U' index.php` != $USER ]; then
+	echo "index.php owner mismatch to current user. Update will fail. Aborting\nYou probably want to run this like: sudo -u `stat -c '%U' LocalSettings.php` ./update.sh\n"
+	exit 1
+fi
 
 # Making simple backup, no images or things, just content
 mkdir -p $UPDATER/backup
