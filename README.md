@@ -4,3 +4,8 @@ Just wget or clone update.sh to any folder under mediawiki installation and run 
 
 ### Requrements:
   * Mediawiki git installation
+  * composer
+
+### Troubleshoot:
+  * sudo composer self-update
+  * try again

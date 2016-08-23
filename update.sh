@@ -27,7 +27,7 @@
 UPDATER=`pwd`
 BACKUPTIME=$(date +"%Y%m%d-%H%M")
 
-cd `git rev-parse --show-toplevel`
+cd .. ; cd `git rev-parse --show-toplevel`
 [ -f LocalSettings.php ] && echo "LocalSettings.php found, all good" || echo "LocalSettings.php not found, is this right folder?" exit
 
 
@@ -35,7 +35,6 @@ cd `git rev-parse --show-toplevel`
 mkdir -p $UPDATER/backup
 echo "causing error 500" > $UPDATER/backup/.htaccess
 php maintenance/dumpBackup.php --full > $UPDATER/backup/$BACKUPTIME.xml
-
 
 # Starting update
 git fetch
@@ -48,6 +47,14 @@ find extensions -maxdepth 1 -type d -print -execdir git --git-dir=extensions/{}/
 # Updating non-submodule skins
 find skins -maxdepth 1 -type d -print -execdir git --git-dir=skins/{}/.git --work-tree=$PWD/{} pull 2>/dev/null \;
 
+
 echo "\n\n"
 
-php maintenance/update.php
+
+php maintenance/update.php 2> /tmp/errormsg
+if grep -q composer.lock </tmp/errormsg;
+then
+	composer update
+	php maintenance/update.php	# retry
+fi
+rm /tmp/errormsg
